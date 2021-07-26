@@ -73,6 +73,8 @@ def index():
     # return jsonify(result_dict)
     return render_template('index.html')
 
+
+
 @app.route('/account', methods=['POST'])
 def post():
     data = request.get_json()
@@ -100,6 +102,7 @@ def execute_SQL():
     with engine.connect() as connection:
         connection.execute(text("DELETE FROM public.anti WHERE ctid NOT IN (SELECT max(ctid) FROM public.anti GROUP BY public.anti.*);"))
         result = connection.execute(text("SELECT * from public.anti;"))
+
         # result = connection.execute(text("SELECT sender from public.anti;"))
         
         # ------------ Logic for Dict ---------------
@@ -157,6 +160,7 @@ def get_latest_sender():
     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 
     # cur.execute('DELETE FROM public.anti;')
+
     # This sql delete all equal rows!
     cur.execute("DELETE FROM public.anti WHERE ctid NOT IN (SELECT max(ctid) FROM public.anti GROUP BY public.anti.*);")
     cur.execute(

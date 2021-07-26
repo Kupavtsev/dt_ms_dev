@@ -62,6 +62,7 @@ def raw_data_convert(raw_data_of_mail, keys_list) -> dict:
     index_of_finish = sender.find('<')
     name = sender[:index_of_finish]             # We don't Cut quotes, some data without quotes
     print('Sender: ', sender)
+    
 
     # We get name amd email separated from sender
     def name_email():                                   # It's start in 'return'
@@ -77,26 +78,36 @@ def raw_data_convert(raw_data_of_mail, keys_list) -> dict:
             return email
     # name_email()
 
-    recipient : str = msg['To']
-    # print(type(recipient))
-    print('Recipient email: ',recipient)
-    def recipient_email():                                   # It's start in 'return'
-        reg_email = r"<.*?>"                            # It's find any in <>
-        try:
-            # print("TRYTRYTRYTRYTRYTRYTRY")
-            email : str = re.findall(reg_email, recipient)[0]        # email from list
-            # print('Что тут получается: ', email)
-            email = email[1:-1]                             # Cut quotes from both sides
-            return email
-        except:
-            # email = 'UnableTo@Read.Email'               # It's can't decode some data
-            return recipient
-
-
-    date_send = (msg['Date'])                          # 'Tue, 29 Jun 2021 19:00:43 +0300'
+    
+    # ----- Sending date -----
+    date_send =  (msg['Date'])                          # 'Tue, 29 Jun 2021 19:00:43 +0300'
     # print(date_send)
     tt : tuple = parsedate_tz(date_send)
-    date_str : str = str(tt[0]) + ' ' + str(tt[1]) + ' ' + str(tt[2])       # Format date for PostgreSQL
+    try:
+        date_str : str = str(tt[0]) + ' ' + str(tt[1]) + ' ' + str(tt[2])       # Format date for PostgreSQL
+    except:
+        date_str : str = '2012 12 12'
+
+
+    recipient : str = msg['To']
+    
+    # in case we haven't correct Reciptient
+    if hasattr(recipient, '__len__') and len(recipient) < 3:
+    # if has_len(recipient) and len(recipient) < 3:
+        recipient = 'not@found.net'
+    print('Recipient email: ',recipient)
+
+    def recipient_email():                                   # It's start in 'return'
+        print('recipient_email')
+        reg_email = r"<.*?>"                            # It's find any in <>
+        try:
+            email : str = re.findall(reg_email, recipient)[0]        # email from list
+            email = email[1:-1]                             # Cut quotes from both sides
+            print('email: ', email)
+            return email
+        except:
+            return recipient
+
 
     subscription_check = subscription(raw_data_of_mail, keys_list)
    

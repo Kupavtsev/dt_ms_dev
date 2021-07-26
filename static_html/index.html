@@ -48,12 +48,35 @@
 
  <div class="col-md-6">
  <div class="form-group">
- <label for="form_email">Email Service * (Почтовая служба)</label>
- <input id="form_email" type="text" name="email" class="form-control" value="Yandex email" required="required" data-error="Valid email is required." readonly>
+
+  <label for="form_email">Email Service * (Почтовая служба)</label>
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Выберите почтовый сервис
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+      <button class="dropdown-item" type="button">Yandex</button>
+      <button class="dropdown-item" type="button">Gmail</button>
+      <button class="dropdown-item" type="button">Mail.ru</button>
+    </div>
+  </div>
+<!--   
+  <div class="dropdown-menu">
+    <a class="dropdown-item" href="#">Action</a>
+    <a class="dropdown-item" href="#">Another action</a>
+    <a class="dropdown-item" href="#">Something else here</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="#">Separated link</a>
+  </div> -->
+
+ <!-- <label for="form_email">Email Service * (Почтовая служба)</label> -->
+ <!-- <input id="form_email" type="text" name="email" class="form-control" value="Yandex email" required="required" data-error="Valid email is required." readonly> -->
  <!-- <input id="form_email" type="text" name="email" class="form-control" placeholder="Please enter your email *" required="required" data-error="Valid email is required."> -->
  <div class="help-block with-errors"></div>
  </div>
  </div>
+
+
 
  <div class="col-md-6">
  <div class="form-group">

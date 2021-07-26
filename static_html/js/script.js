@@ -6,29 +6,81 @@ const mainFrom = document.querySelector('#request-form');
 
 const loginInput = document.querySelector('#form_login');
 const passwordInput = document.querySelector('#form_password');
-const emailServiceInput = document.querySelector('#form_email');
+// const emailServiceInput = document.querySelector('#form_email');
+
+const dropDownButton = document.querySelector('#dropdownMenu2')
+const yndexServiceChoice = document.getElementsByClassName('dropdown-item')[0];
+const gmailServiceChoice = document.getElementsByClassName('dropdown-item')[1];
+const mailruServiceChoice = document.getElementsByClassName('dropdown-item')[2];
+
 const keyWordsInput = document.querySelector('#form_keywords');
-const resultTextArea = document.querySelector('#form_result');
+// const resultTextArea = document.querySelector('#form_result');
 
 let btnCheckMail = document.getElementsByClassName('btn btn-success btn-send')[0];
 let btnShowResult = document.getElementsByClassName('btn btn-send')[1];
 
-// btnCheckMail.addEventListener('click', function (e) {
-//     console.log(this.btnCheckMail)
-// })
 
 
 // ======   BLL   ======
 
+// CHOICE OF MAIL SERVICE
+
+dropDownButton.addEventListener('click', function(e) {
+    yndexServiceChoice.addEventListener('click', function (e) {
+        
+        dropDownButton.innerHTML = 'Yandex'
+        dropDownButton.value = 'imap.yandex.ru'
+        console.log(dropDownButton.value);
+    })
+    gmailServiceChoice.addEventListener('click', function (e) {
+        dropDownButton.innerHTML = 'Gmail'
+        dropDownButton.value = 'imap.gmail.com'
+        console.log(dropDownButton.value);
+    })
+    mailruServiceChoice.addEventListener('click', function (e) {
+        dropDownButton.innerHTML = 'Mail.ru'
+        dropDownButton.value = 'imap.mail.ru'
+        console.log(dropDownButton.value);
+    })
+})
+
+// let mailServiceChoice = () => {
+//     yndexServiceChoice.addEventListener('click', function (e) {
+//         debugger;
+        
+//         // dropDownButton.innerHTML = 'Yandex'
+//         // console.log(this.yndexServiceChoice);
+//         console.log('yndexServiceChoice');
+//     })
+//     return dropDownButton.innerHTML = 'Yandex'
+// }
+
+
+
+// FORM HANDLER
 let mail_service, login, password, keyWords;
 
-mainFrom.addEventListener('submit', onSubmit)
+// mainFrom.addEventListener('submit', onSubmit)
+mainFrom.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!dropDownButton.value) {
+        alert('Выберите Email Service');
+    } else {
+        onSubmit();
+        console.log('onSubmit')
+    }
+    // console.log('CheckData')
+})
+
+
 
 function onSubmit(e) {
-    e.preventDefault();
+    // e.preventDefault();
     btnCheckMail.setAttribute('disabled', 'disabled')
 
-    mail_service = 'imap.yandex.ru'
+
+    mail_service = dropDownButton.value
+    // mail_service = 'imap.yandex.ru'
     login = loginInput.value
     password = passwordInput.value
     keyWords = keyWordsInput.value
@@ -67,17 +119,22 @@ function onSubmit(e) {
 // Check data from DB
 btnShowResult.addEventListener('click', function (e) {
     e.preventDefault();
-    getDataWithFetch();
+    let login = loginInput.value;
+    if (login.length < 1) {
+        alert('Введите Login имэйла');
+    } else {
+        getDataWithFetch();
+    }
     // console.log('CheckData')
 })
+
+
 
 
 // Getting DATA from DB
 let getDataWithFetch = () => {
     let login = loginInput.value;
-    if (login.length < 1) {
-        alert('Введите Login имэйла');
-    }
+    
     // fetch('http://127.0.0.1:5000/senders')
     fetch('http://127.0.0.1:5000/senders?login=' + login)
         .then((response) => {
@@ -118,5 +175,3 @@ let getDataWithFetch = () => {
 
         })
 }
-
-
