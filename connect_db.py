@@ -45,6 +45,7 @@ def add_to_base(dict_my):
 
 
 
+    # cur.execute('DELETE FROM public.anti;')
 
     cur.execute( # 'cur' object calls the 'execute' method 
         """INSERT INTO public.anti(

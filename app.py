@@ -1,5 +1,5 @@
 import psycopg2.extras
-
+from datetime import timedelta
 
 import os
 from flask import Flask, render_template, jsonify, request, redirect, url_for
@@ -86,8 +86,9 @@ def post():
 
     
     # from sqlalchemy_engine.account import mail_service, login, password
-    get_data(mail_service, login, password, keys_list)
+    get_data(mail_service, login, password, keys_list)          # Push this data to app_yandex
 
+    # Here is function which is check for subscriptions by date
     
 
     try:
@@ -96,12 +97,12 @@ def post():
         return {'status': 'fail'}, 400
 
 
-@app.route('/check', methods=['GET'])
-def execute_SQL():
+# @app.route('/check', methods=['GET'])
+# def execute_SQL():
     # We use 'sqlalchemy' to get data from DB
-    with engine.connect() as connection:
-        connection.execute(text("DELETE FROM public.anti WHERE ctid NOT IN (SELECT max(ctid) FROM public.anti GROUP BY public.anti.*);"))
-        result = connection.execute(text("SELECT * from public.anti;"))
+    # with engine.connect() as connection:
+    #     connection.execute(text("DELETE FROM public.anti WHERE ctid NOT IN (SELECT max(ctid) FROM public.anti GROUP BY public.anti.*);"))
+        # result = connection.execute(text("SELECT * from public.anti;"))
 
         # result = connection.execute(text("SELECT sender from public.anti;"))
         
@@ -121,19 +122,19 @@ def execute_SQL():
     # return result_dict
         
         # --------------- Logic for Array ----------------
-        result_list = []
-        for row in result:
-            dict_key = {}
-            dict_key["Send Date"] = row['send_date']
-            dict_key["sender"] = row['email']
-            dict_key["Subscription"] = row['subscription']
-            # dict_key["Recipient"] = row['recipient']
-            result_list.append(dict_key)
+    #     result_list = []
+    #     for row in result:
+    #         dict_key = {}
+    #         dict_key["Send Date"] = row['send_date']
+    #         dict_key["sender"] = row['email']
+    #         dict_key["Subscription"] = row['subscription']
+    #         # dict_key["Recipient"] = row['recipient']
+    #         result_list.append(dict_key)
        
-    return jsonify(result_list)
+    # return jsonify(result_list)
 
 
-
+TWONY_TWO_DAYS = timedelta(22)
 
 @app.route('/senders', methods=['GET'])
 def get_latest_sender():
@@ -170,7 +171,9 @@ def get_latest_sender():
         )
     result = cur.fetchall()
 
-    result_list = []
+    result_list_total_data : list = []
+    result_list : list = []
+    result_list_periods : list = []
     for row in result:
         dict_key = {}
         dict_key["Send Date"] = row['send_date']
@@ -178,12 +181,77 @@ def get_latest_sender():
         dict_key["Subscription"] = row["subscription"]
         dict_key["Recipient"] = row['recipient']
         result_list.append(dict_key)
+
+
+    #   =============================================
+    #   ====== Объеденяем даты по получателям =======
+    #   =============================================
+    # Словарь с отправителями из БД
+    senders_periods_dict : dict = {}
+   
+    # Каждый словарь массива отправителей
+    # 1
+    for each_sender in range(len(result_list)):
+        # print(result_list[each_sender])
+        senders_periods_dict[result_list[each_sender]['sender']] = [[]]
+
+    # Если ключ в senders_periods_dict равен значению sender в dict_key,
+    # то поместить значение даты в массив значений senders_periods_dict
+    for key, dates in sorted(senders_periods_dict.items()):
+        for each_dict in range(len(result_list)):
+            for each_sender in dates:
+                if key == result_list[each_dict]['sender']:
+                    each_sender.append(result_list[each_dict]['Send Date'])
+
+     
+    print('===================')
+    # Проверка на периодичность
+    quantity_of_periods = 0
+    for k,v in senders_periods_dict.items():
+        # print('\n')
+        # print(k, ' : ')
+        # print(type(v[0]))
+        list_of_dates = v[0]
+        
+        # print(len(v[0]))
+        if len((v[0])) > 1:
+            # print(list_of_dates[0])
+            # print(list_of_dates[1])
+        #     print(senders_periods_dict['taco@trello.com'][0][v])
+            print('pass')
+            if list_of_dates[0] - list_of_dates[1] > TWONY_TWO_DAYS:
+                periods_dict_key = {}
+                periods_dict_key['Sender of Subscription'] = k
+                periods_dict_key['Last Send Date'] = list_of_dates[0]
+                periods_dict_key['Periods'] = len(list_of_dates)
+                print('\n')
+                print(k, ' : ')
+                print(v)
+                print('Subscription')
+                quantity_of_periods += 1
+                result_list_periods.append(periods_dict_key)
+            else:
+                pass
+ 
     
+    #   ========================================
+    #   ====== Даты по получателям конец =======
+    #   ========================================
+
+    result_list_total_data.append(result_list)
+    result_list_total_data.append(result_list_periods)
+
+
+
+
 
     cur.close()
     conn.close()
 
-    return jsonify(result_list)
+    # print(result_list)
+    print(result_list_total_data)
+    # return jsonify(result_list)
+    return jsonify(result_list_total_data)
 
 
 

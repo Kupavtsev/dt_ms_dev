@@ -145,22 +145,28 @@ let getDataWithFetch = () => {
         })
       
         .then((data) => {
+            // debugger;
+            let data1 = data[0]
+            let data2 = data[1]
             // console.log(typeof data)
             // console.log(data.length)
-            let count_data = data.length
+            let count_data = data1.length
             if (count_data = 1) {
                 // console.log(data[0]['Send Date'])
-                let date_str = data[0]['Send Date'].substring(0, 16)
+                let date_str = data1[0]['Send Date'].substring(0, 16)
             } else {
                 // console.log(data[3]['Send Date'])
-                let date_str = data[3]['Send Date'].substring(0, 16)
+                let date_str = data1[3]['Send Date'].substring(0, 16)
             }
             
-           
-            if (data.length > 0) {
+
+            if (data1.length > 0 || data2.length > 0) {
+                // debugger;
                 let temp = '';
-                let id = data.length
-                data.forEach((itemData) => {
+                let id = data1.length
+
+                {data1.forEach((itemData) => {
+                    // debugger;
                     if (loginInput.value == itemData['Recipient']) {
                         temp += "<tr>";
                         temp += "<td>" + id + "</td>"
@@ -168,10 +174,96 @@ let getDataWithFetch = () => {
                         temp += "<td>" + itemData['sender'] + "</td>"
                         temp += "<td>" + itemData['Subscription'] + "</td></tr>";
                         --id;
+                        document.getElementById('data').innerHTML = temp;
                     }
                 });
-                document.getElementById('data').innerHTML = temp;
             }
+                let temp2 = '';
+                let id2 = data2.length
+                data2.forEach((itemData2) => {
+                    // debugger;
+                    // if (loginInput.value == itemData['Recipient']) {
+                        temp2 += "<tr>";
+                        temp2 += "<td>" + id2 + "</td>"
+                        temp2 += "<td>" + itemData2['Last Send Date'].substring(0, 16) + "</td>"
+                        temp2 += "<td>" + itemData2['Sender of Subscription'] + "</td>"
+                        temp2 += "<td>" + itemData2['Periods'] + "</td></tr>";
+                        console.log(itemData2['Last Send Date'])
+                        --id2;
+                        document.getElementById('periods').innerHTML = temp2;
+                    // }
+                });
+        }
+
+            // This is WORK AND MAIN
+            // if (data1.length > 0) {
+            //     let temp = '';
+            //     let id = data1.length
+
+            //     {data1.forEach((itemData) => {
+            //         // debugger;
+            //         if (loginInput.value == itemData['Recipient']) {
+            //             temp += "<tr>";
+            //             temp += "<td>" + id + "</td>"
+            //             temp += "<td>" + itemData['Send Date'].substring(0, 16) + "</td>"
+            //             temp += "<td>" + itemData['sender'] + "</td>"
+            //             temp += "<td>" + itemData['Subscription'] + "</td></tr>";
+            //             --id;
+            //             document.getElementById('data').innerHTML = temp;
+            //         }
+            //     });
+            // }}
+            //  THE END OF WORK CODE
+
+            
+            // else if (data2.length > 0) {
+                
+            //     let temp2 = '';
+            //     let id2 = data2.length
+            //     data2.forEach((itemData2) => {
+            //         // debugger;
+            //         if (loginInput.value == itemData2['Recipient']) {
+            //             temp2 += "<tr>";
+            //             temp2 += "<td>" + id2 + "</td>"
+            //             temp2 += "<td>" + itemData2['Last Send Date:'].substring(0, 16) + "</td>"
+            //             temp2 += "<td>" + itemData2['Sender of Subscription'] + "</td>"
+            //             temp2 += "<td>" + itemData2['Periods'] + "</td></tr>";
+            //             --id2;
+            //             document.getElementById('periods').innerHTML = temp2;
+            //         }
+            //     });
+            
+            // }
 
         })
+        // .then((data) => {
+        //     // debugger;
+        //     // console.log(typeof data)
+        //     // console.log(data.length)
+        //     let count_data = data.length
+        //     if (count_data = 1) {
+        //         // console.log(data[0]['Send Date'])
+        //         let date_str = data[0]['Send Date'].substring(0, 16)
+        //     } else {
+        //         // console.log(data[3]['Send Date'])
+        //         let date_str = data[3]['Send Date'].substring(0, 16)
+        //     }
+
+        //     if (data.length > 0) {
+        //                         let temp2 = '';
+        //         let id2 = data.length
+        //         data.forEach((itemData2) => {
+        //             // debugger;
+        //             if (loginInput.value == itemData2['Recipient']) {
+        //                 temp2 += "<tr>";
+        //                 temp2 += "<td>" + id2 + "</td>"
+        //                 temp2 += "<td>" + itemData2['Last Send Date:'].substring(0, 16) + "</td>"
+        //                 temp2 += "<td>" + itemData2['Sender of Subscription'] + "</td>"
+        //                 temp2 += "<td>" + itemData2['Periods'] + "</td></tr>";
+        //                 --id2;
+        //             }
+        //         });
+        //         document.getElementById('periods').innerHTML = temp2;
+        //     }
+        // })
 }

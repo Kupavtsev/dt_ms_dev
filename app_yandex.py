@@ -1,5 +1,9 @@
 # from datetime import datetime
+import datetime
+
 from email.utils import parsedate_tz
+import dateparser
+
 import imaplib
 import email
 import re
@@ -10,6 +14,8 @@ from connect_db import add_to_base
 # USE IT IN CASE WITHOUT API
 # from libs.key_values_scan import keys_list
 # from config import MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD
+
+TWO_YEARS_PERIOD_CHECK : datetime = datetime.datetime.now() - datetime.timedelta(days=2*365)
 
 
 def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
@@ -31,27 +37,59 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
                                                          # decode it from binary
 
     numbers_mails_list : list = numbers_mails.split()           # List of numbers (each is Sring)
-    # print(len(numbers_mails_list))                       # Letters quantity in 'ínbox' for cycling
+ 
     
     
     # =================================================
     # --- Main Cycle of letters iteration
     # =================================================
 
+    # for num in numbers_mails_list:
     for num in range(len(numbers_mails_list)):              # In range of letters quantity
-        id = num + 1
-        result, data = mail.fetch(str(id), "(RFC822)")      # tuple (status, [ Total Content ])
-        # raw_data_of_mail = data[0][1].decode()            # String of Total content decoded from binary
-        raw_data_of_mail = data[0][1].decode('latin-1')     # Try to sole Cirylic proplem      
-        
+        id = len(numbers_mails_list) - (num + 1)
+        if id >= 1:
+            # id = num + 1
+            print("ID Main: ", id)
+            result, data = mail.fetch(str(id), "(RFC822)")      # tuple (status, [ Total Content ])
+            # result, data = mail.fetch(num, "(RFC822)")      # tuple (status, [ Total Content ])
+            # raw_data_of_mail = data[0][1].decode()            # String of Total content decoded from binary
+            raw_data_of_mail = data[0][1].decode('latin-1')     # Try to solve Cirylic proplem      
+            
 
-        # Перенести сюда проверку даты и переходить к raw_data_convert только ранее 2х лет
+            #   --- Work with content of letter
+            msg : str = email.message_from_string(raw_data_of_mail)     # ?   
 
 
-        data_dict : dict = raw_data_convert(raw_data_of_mail, keys_list)  # Dict of all main data
-        print(data_dict)
-        if data_dict['Subscription'] != 0:
-            add_to_base(data_dict)                            # Send dict with data to Postgres
+            # ----- Sending date -----
+            date_send =  (msg['Date'])                          # 'Tue, 29 Jun 2021 19:00:43 +0300'
+            tt : tuple = parsedate_tz(date_send)
+            try:
+                date_str : str = str(tt[0]) + ' ' + str(tt[1]) + ' ' + str(tt[2])       # Format date for PostgreSQL
+            except:
+                date_str : str = '2012 12 12'
+
+            current_mail_date : datetime = dateparser.parse(date_str)
+            
+            if current_mail_date > TWO_YEARS_PERIOD_CHECK:
+
+                data_dict : dict = raw_data_convert(msg, raw_data_of_mail, keys_list, date_str)  # Dict of all main data
+                print(data_dict)
+                if data_dict['Subscription'] != 0:
+                    add_to_base(data_dict)                            # Send dict with data to Postgres
+            else:
+                # return {}
+                pass
+            #     return {
+            #     'Sender': None,
+            #     'Email': None,
+            #     'Date': None,
+            #     'Recipient' : None,
+            #     'Subscription' : None
+            # }    
+                break
+        else:
+            pass
+            break
         # ==============================================
         # RawData -> Convert RD -> Dict of data -> to DB
         # ==============================================
@@ -60,10 +98,10 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
 
 
 # 
-def raw_data_convert(raw_data_of_mail, keys_list) -> dict:
+def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
 
-    #   --- Work with content of letter
-    msg : str = email.message_from_string(raw_data_of_mail)     # ?    
+    # #   --- Work with content of letter
+    # msg : str = email.message_from_string(raw_data_of_mail)     # ?    
     
     sender : str =  (msg['From'])
     print('sender: ', sender)
@@ -85,20 +123,7 @@ def raw_data_convert(raw_data_of_mail, keys_list) -> dict:
             return email
 
 
-    # ----- Sending date -----
-    date_send =  (msg['Date'])                          # 'Tue, 29 Jun 2021 19:00:43 +0300'
-    # print(date_send)
-    tt : tuple = parsedate_tz(date_send)
-    try:
-        date_str : str = str(tt[0]) + ' ' + str(tt[1]) + ' ' + str(tt[2])       # Format date for PostgreSQL
-    except:
-        date_str : str = '2012 12 12'
     
-    
-    # ----- Recipient Email -----
-    # def has_len(obj):
-    #     return hasattr(obj, '__len__')
-
     recipient : str = msg['To']
     
     # in case we haven't correct Reciptient
