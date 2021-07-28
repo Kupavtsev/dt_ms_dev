@@ -136,7 +136,8 @@ let getDataWithFetch = () => {
     let login = loginInput.value;
     
     // fetch('http://127.0.0.1:5000/senders')
-    fetch('http://127.0.0.1:5000/senders')
+    // fetch('http://127.0.0.1:5000/senders?login=' + login)           // FLASK
+    fetch('http://127.0.0.1:5000/senders/' + login)           // FAST
         .then((response) => {
             // console.log(typeof login)
             // console.log(login)

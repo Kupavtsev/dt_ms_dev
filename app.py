@@ -1,3 +1,13 @@
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import PlainTextResponse, HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+import pkg_resources
+import random
+import uvicorn
+
+# ====== FLASK AND MAIN IMPORTS ======
 import psycopg2.extras
 from datetime import timedelta
 
@@ -32,24 +42,27 @@ TEMPLATE_FOLDER = os.path.join(APP_DIR, 'static_html/') # Where your index.html 
 # except:
 #     print("Can't create 'engine")
 
-
-
-
-app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+# FAST API
+app = FastAPI()
+app.mount("/static_html", StaticFiles(directory=pkg_resources.resource_filename(__name__, 'static_html')), name="static_html")              # FASTAPI
+# # FLASK
+# app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 # app = Flask(__name__)
 # =================================================================================
 # CORS(app) #comment this on deployment
 # =================================================================================
-app.config.from_object(config)
-db = SQLAlchemy(app)
+# app.config.from_object(config)
+# db = SQLAlchemy(app)
 # from models import *
 
 
+base_url = "/"                                      # FASTAPI
 
-
-
-@app.route('/', methods=['GET'])
-def index():
+@app.get("/", include_in_schema=False)              # FASTAPI
+# def root():
+    
+# @app.route('/', methods=['GET'])
+async def index():                                   # FASTAPI
     
     # We use 'sqlalchemy' to get data from DB
     # with engine.connect() as connection:
@@ -71,7 +84,8 @@ def index():
     #  })
         # print(result_dict)
     # return jsonify(result_dict)
-    return render_template('index.html')
+    # return render_template('index.html')
+    return HTMLResponse(pkg_resources.resource_string(__name__, 'static_html/index.html'))   # FASTAPI
 
 
 
@@ -136,12 +150,19 @@ def post():
 
 TWONY_TWO_DAYS = timedelta(22)
 
-@app.route('/senders', methods=['GET'])
-def get_latest_sender():
+# class Data(BaseModel):                                  # FASTAPI
+#     login: str
 
-    user = request.args.get('login')
-    # user = request.args['login']
-    # print(user)
+@app.get('/senders/{user}')                                    # FASTAPI
+# @app.route('/senders', methods=['GET'])             # FLASK
+# def get_latest_sender():                            # FLASK
+def get_latest_sender(user: str):                           # FASTAPI
+
+    # user  = {'user': user}                                     # FASTAPI
+    # user  = login  
+    print(user)                                   # FASTAPI
+    # user = request.args.get('login')                  # FLASK
+    # user = request.args['login']              # Вроде заданный параметр
 
     try:
         conn = psycopg2.connect(
@@ -258,6 +279,7 @@ def get_latest_sender():
 if __name__ == '__main__':
 
 
-    app.run(port=5000, host='0.0.0.0')
+    uvicorn.run('app:app', host='0.0.0.0', port=5000, reload=True)
+    # app.run(port=5000, host='0.0.0.0')
     # app.run(host='34.141.12.119', port=5000 )
 
