@@ -91,16 +91,11 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
                 print(data_dict)
                 if data_dict['Subscription'] != 0:
                     add_to_base(data_dict)                            # Send dict with data to Postgres
+                else:
+                    pass
+                    # print('there was not matches')
             else:
-                # return {}
                 pass
-            #     return {
-            #     'Sender': None,
-            #     'Email': None,
-            #     'Date': None,
-            #     'Recipient' : None,
-            #     'Subscription' : None
-            # }    
                 break
         else:
             pass
@@ -118,6 +113,7 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
     # #   --- Work with content of letter
     # msg : str = email.message_from_string(raw_data_of_mail)     # ?    
     
+    # SENDER
     sender : str =  (msg['From'])
     print('sender: ', sender)
     index_of_finish = sender.find('<')          # Cut sender's name till '<'
@@ -135,6 +131,7 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
 
 
     
+    # RECIPIENT
     recipient : str = msg['To']
     
     # in case we haven't correct Reciptient
@@ -170,7 +167,6 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
         }      
 
 
-test = 'test'
 
 if __name__ == '__main__':
     get_email_data = get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list)

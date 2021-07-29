@@ -1,10 +1,8 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import PlainTextResponse, HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import pkg_resources
-import random
 import uvicorn
 
 # ====== FLASK AND MAIN IMPORTS ======
@@ -12,25 +10,14 @@ import psycopg2.extras
 from datetime import timedelta
 
 import os
-from flask import Flask, render_template, jsonify, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, text
 # =================================================================================
 # from flask_cors import CORS #comment this on deployment
 # =================================================================================
 
 
-import config as config
+# import config as config
 from config import PG_LOGIN, PG_PASSWORD
 from app_yandex import get_data
-
-# # __init__.py
-APP_DIR = os.path.abspath(os.path.dirname(__file__))
-STATIC_FOLDER = os.path.join(APP_DIR, 'static_html/js/') # Where your webpack build output folder is
-TEMPLATE_FOLDER = os.path.join(APP_DIR, 'static_html/') # Where your index.html file is located
-
-
-# from models import Sender
 
 
 
@@ -45,23 +32,17 @@ TEMPLATE_FOLDER = os.path.join(APP_DIR, 'static_html/') # Where your index.html 
 # FAST API
 app = FastAPI()
 app.mount("/static_html", StaticFiles(directory=pkg_resources.resource_filename(__name__, 'static_html')), name="static_html")              # FASTAPI
-# # FLASK
-# app = Flask(__name__, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-# app = Flask(__name__)
+
 # =================================================================================
 # CORS(app) #comment this on deployment
 # =================================================================================
 # app.config.from_object(config)
 # db = SQLAlchemy(app)
-# from models import *
 
 
 base_url = "/"                                      # FASTAPI
 
 @app.get("/", include_in_schema=False)              # FASTAPI
-# def root():
-    
-# @app.route('/', methods=['GET'])
 async def index():                                   # FASTAPI
     
     # We use 'sqlalchemy' to get data from DB
@@ -98,12 +79,7 @@ async def index():                                   # FASTAPI
 # @app.route('/account', methods=['POST'])
 @app.post('/account')
 async def post( data : dict):
-    # print('First Entry', data)
-    # print('Type: ', type(data))
-    # data = request.get_json()
-    # print('First Entry', data)
     mail_service = data['mail_service']
-    # print('mail_service: ', mail_service)
     login = data['login']
     password = data['password']
     keys_list = data['keyWords']
@@ -111,10 +87,10 @@ async def post( data : dict):
 
     
     # from sqlalchemy_engine.account import mail_service, login, password
+    # Возвращает словарь и помещает его в БД
     get_data(mail_service, login, password, keys_list)          # app_yandex.py
 
-    # Here is function which is check for subscriptions by date
-    
+        
 
     try:
         return {'status': 'ok'}, 200
@@ -165,15 +141,7 @@ TWONY_TWO_DAYS = timedelta(22)
 #     login: str
 
 @app.get('/senders/{user}')                                    # FASTAPI
-# @app.route('/senders', methods=['GET'])             # FLASK
-# def get_latest_sender():                            # FLASK
 async def get_latest_sender(user: str):                           # FASTAPI
-
-    # user  = {'user': user}                                     # FASTAPI
-    # user  = login  
-    # print(user)                                   # FASTAPI
-    # user = request.args.get('login')                  # FLASK
-    # user = request.args['login']              # Вроде заданный параметр
 
     try:
         conn = psycopg2.connect(
@@ -189,9 +157,7 @@ async def get_latest_sender(user: str):                           # FASTAPI
         raise ex
 
     
-    # cur = conn.cursor()
     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-    # print(cur)
     # cur.execute('DELETE FROM public.anti;')
 
     # This sql delete all equal rows!
@@ -201,7 +167,6 @@ async def get_latest_sender(user: str):                           # FASTAPI
         SELECT send_date, email, subscription, recipient from public.anti WHERE subscription > 0 AND recipient='{user}';
         """
         ))
-    # print(cur.execute('select * from public.anti'))             ITS WORK
     result = cur.fetchall()
 
     result_list_total_data : list = []
@@ -242,16 +207,9 @@ async def get_latest_sender(user: str):                           # FASTAPI
     # Проверка на периодичность
     quantity_of_periods = 0
     for k,v in senders_periods_dict.items():
-        # print('\n')
-        # print(k, ' : ')
-        # print(type(v[0]))
         list_of_dates = v[0]
         
-        # print(len(v[0]))
         if len((v[0])) > 1:
-            # print(list_of_dates[0])
-            # print(list_of_dates[1])
-        #     print(senders_periods_dict['taco@trello.com'][0][v])
             print('pass')
             if list_of_dates[0] - list_of_dates[1] > TWONY_TWO_DAYS:
                 periods_dict_key = {}
@@ -274,9 +232,6 @@ async def get_latest_sender(user: str):                           # FASTAPI
 
     result_list_total_data.append(result_list)
     result_list_total_data.append(result_list_periods)
-
-
-
 
 
     cur.close()
