@@ -88,11 +88,22 @@ async def index():                                   # FASTAPI
     return HTMLResponse(pkg_resources.resource_string(__name__, 'static_html/index.html'))   # FASTAPI
 
 
+# class Item(BaseModel):
+#     mail_service : str
+#     login : str
+#     password : str
+#     keyWords : str
 
-@app.route('/account', methods=['POST'])
-def post():
-    data = request.get_json()
+
+# @app.route('/account', methods=['POST'])
+@app.post('/account')
+async def post( data : dict):
+    # print('First Entry', data)
+    # print('Type: ', type(data))
+    # data = request.get_json()
+    # print('First Entry', data)
     mail_service = data['mail_service']
+    # print('mail_service: ', mail_service)
     login = data['login']
     password = data['password']
     keys_list = data['keyWords']
@@ -156,7 +167,7 @@ TWONY_TWO_DAYS = timedelta(22)
 @app.get('/senders/{user}')                                    # FASTAPI
 # @app.route('/senders', methods=['GET'])             # FLASK
 # def get_latest_sender():                            # FLASK
-def get_latest_sender(user: str):                           # FASTAPI
+async def get_latest_sender(user: str):                           # FASTAPI
 
     # user  = {'user': user}                                     # FASTAPI
     # user  = login  
@@ -271,8 +282,9 @@ def get_latest_sender(user: str):                           # FASTAPI
 
     # print(result_list)
     print(result_list_total_data)
-    # return jsonify(result_list)
-    return jsonify(result_list_total_data)
+    # return result_list                            # this is for anykeys only
+    return result_list_total_data 
+
 
 
 
@@ -282,4 +294,3 @@ if __name__ == '__main__':
     uvicorn.run('app:app', host='0.0.0.0', port=5000, reload=True)
     # app.run(port=5000, host='0.0.0.0')
     # app.run(host='34.141.12.119', port=5000 )
-
