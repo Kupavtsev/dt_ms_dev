@@ -111,7 +111,7 @@ async def post( data : dict):
 
     
     # from sqlalchemy_engine.account import mail_service, login, password
-    get_data(mail_service, login, password, keys_list)          # Push this data to app_yandex
+    get_data(mail_service, login, password, keys_list)          # app_yandex.py
 
     # Here is function which is check for subscriptions by date
     
@@ -171,7 +171,7 @@ async def get_latest_sender(user: str):                           # FASTAPI
 
     # user  = {'user': user}                                     # FASTAPI
     # user  = login  
-    print(user)                                   # FASTAPI
+    # print(user)                                   # FASTAPI
     # user = request.args.get('login')                  # FLASK
     # user = request.args['login']              # Вроде заданный параметр
 
@@ -191,16 +191,17 @@ async def get_latest_sender(user: str):                           # FASTAPI
     
     # cur = conn.cursor()
     cur = conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-
+    # print(cur)
     # cur.execute('DELETE FROM public.anti;')
 
     # This sql delete all equal rows!
     cur.execute("DELETE FROM public.anti WHERE ctid NOT IN (SELECT max(ctid) FROM public.anti GROUP BY public.anti.*);")
-    cur.execute(
+    print(cur.execute(
         f"""
         SELECT send_date, email, subscription, recipient from public.anti WHERE subscription > 0 AND recipient='{user}';
         """
-        )
+        ))
+    # print(cur.execute('select * from public.anti'))             ITS WORK
     result = cur.fetchall()
 
     result_list_total_data : list = []
@@ -209,6 +210,7 @@ async def get_latest_sender(user: str):                           # FASTAPI
     for row in result:
         dict_key = {}
         dict_key["Send Date"] = row['send_date']
+        print(dict_key["Send Date"])
         dict_key["sender"] = row["email"]
         dict_key["Subscription"] = row["subscription"]
         dict_key["Recipient"] = row['recipient']
@@ -280,7 +282,7 @@ async def get_latest_sender(user: str):                           # FASTAPI
     cur.close()
     conn.close()
 
-    # print(result_list)
+    print(result_list)
     print(result_list_total_data)
     # return result_list                            # this is for anykeys only
     return result_list_total_data 

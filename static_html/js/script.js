@@ -149,13 +149,13 @@ let getDataWithFetch = () => {
             let data1 = data[0]
             let data2 = data[1]
             let count_data = data1.length
-            if (count_data = 1) {
-                // console.log(data[0]['Send Date'])
-                let date_str = data1[0]['Send Date'].substring(0, 16)
-            } else {
-                // console.log(data[3]['Send Date'])
-                let date_str = data1[3]['Send Date'].substring(0, 16)
-            }
+            // if (count_data = 1) {
+            //     // console.log(data[0]['Send Date'])
+            //     let date_str = data1[0]['Send Date'].substring(0, 16)
+            // } else {
+            //     // console.log(data[3]['Send Date'])
+            //     let date_str = data1[3]['Send Date'].substring(0, 16)
+            // }
             
 
             if (data1.length > 0 || data2.length > 0) {

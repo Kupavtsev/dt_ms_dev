@@ -16,9 +16,23 @@ from connect_db import add_to_base
 # from config import MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD
 
 TWO_YEARS_PERIOD_CHECK : datetime = datetime.datetime.now() - datetime.timedelta(days=2*365)
+REGEX_MAIL_VALIDATION = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
-
+# 1. get_data функция принимает данные из Пост запроса из Веб Сервиса
+# 2. Входит в почтовый сервер с этими данными
+#    Проверяет наличие и количество писем в папке входящие
+# 3. В цикле проходит по каждому письму
+#    Проверяет, письма начиная с последнего,
+#        проверяет дату, чтобы она была не старше 2х лет
+#    и вызавет функцию raw_data_convert, передавая ей письмо, ключевые слова и дату письма
+#    и помещает ответ данной функции в БД connect_db.py
+# 4. raw_data_convert, получает ОТ, КОМУ,
+# 5. запускает subscription (libs/subscription.py), передает все письмо и ключевые слова
+#    Возвращает Число найденных совпадений
+# 6. возвращает словарь помещаемый в connect_db.py
 def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
+   
+    # -= 2 =-
     #   --- Connection
     mail = imaplib.IMAP4_SSL(MAIL_SERVICE)              # IMAP session with domain
     mail.login(MAIL_LOGIN, MAIL_PASSWORD)                             # Login to account
@@ -44,6 +58,7 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
     # --- Main Cycle of letters iteration
     # =================================================
 
+    #  -= 3 =-
     # for num in numbers_mails_list:
     for num in range(len(numbers_mails_list)):              # In range of letters quantity
         id = len(numbers_mails_list) - (num + 1)
@@ -97,7 +112,7 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
     return print('ok ?')
 
 
-# 
+# -= 4 =-
 def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
 
     # #   --- Work with content of letter
@@ -111,12 +126,8 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
 
     # ----- Sender Email -----
     def name_email():                                             # We get email separated from sender
-        # reg_name = r"\"[\w\s\?@\?.]+"         
-        # reg_name = r"\w.*"         
-        reg_email = r"<.*?>"                                      # It's find any in <>
         try:
-            email : str = re.findall(reg_email, sender)[0]        # email from list
-            email = email[1:-1]                                   # Cut quotes from both sides
+            email : str = re.findall(REGEX_MAIL_VALIDATION, sender)[0]        # email from list
             return email
         except:
             email = 'UnableTo@Read.Email'               # It's can't decode some data
@@ -133,24 +144,23 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
     print('Recipient email: ',recipient)
 
     def recipient_email():                                   # It's start in 'return'
-        print('recipient_email')
-        reg_email = r"<.*?>"                            # It's find any in <>
         try:
-            email : str = re.findall(reg_email, recipient)[0]        # email from list
-            email = email[1:-1]                             # Cut quotes from both sides
-            print('email: ', email)
+            email : str = re.findall(REGEX_MAIL_VALIDATION, recipient)[0]        # email from list
             return email
         except:
             return recipient
 
 
+    # -= 5 =-
     # Subscription check
     subscription_check = subscription(
                                         raw_data_of_mail,
                                         keys_list
                                     )
-
+    
     # print (msg.get_payload(decode=True))            
+
+    # -= 6 =-
     return {
         'Sender': name,
         'Email': name_email(),
