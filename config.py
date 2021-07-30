@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import dotenv
-from sqlalchemy import create_engine, text
+# from sqlalchemy import create_engine, text
 
 
 

@@ -175,7 +175,7 @@ async def get_latest_sender(user: str):                           # FASTAPI
     for row in result:
         dict_key = {}
         dict_key["Send Date"] = row['send_date']
-        print(dict_key["Send Date"])
+        # print(dict_key["Send Date"])
         dict_key["sender"] = row["email"]
         dict_key["Subscription"] = row["subscription"]
         dict_key["Recipient"] = row['recipient']
@@ -210,16 +210,16 @@ async def get_latest_sender(user: str):                           # FASTAPI
         list_of_dates = v[0]
         
         if len((v[0])) > 1:
-            print('pass')
+            # print('pass')
             if list_of_dates[0] - list_of_dates[1] > TWONY_TWO_DAYS:
                 periods_dict_key = {}
                 periods_dict_key['Sender of Subscription'] = k
                 periods_dict_key['Last Send Date'] = list_of_dates[0]
                 periods_dict_key['Periods'] = len(list_of_dates)
-                print('\n')
-                print(k, ' : ')
-                print(v)
-                print('Subscription')
+                # print('\n')
+                # print(k, ' : ')
+                # print(v)
+                # print('Subscription')
                 quantity_of_periods += 1
                 result_list_periods.append(periods_dict_key)
             else:
@@ -237,8 +237,8 @@ async def get_latest_sender(user: str):                           # FASTAPI
     cur.close()
     conn.close()
 
-    print(result_list)
-    print(result_list_total_data)
+    # print(result_list)
+    # print(result_list_total_data)
     # return result_list                            # this is for anykeys only
     return result_list_total_data 
 

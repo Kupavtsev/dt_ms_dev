@@ -10,7 +10,9 @@ import re
 
 
 from libs.subscription import subscription
+from libs.price_reports import price_reports
 from connect_db import add_to_base
+
 # USE IT IN CASE WITHOUT API
 # from libs.key_values_scan import keys_list
 # from config import MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD
@@ -87,8 +89,11 @@ def get_data(MAIL_SERVICE, MAIL_LOGIN, MAIL_PASSWORD, keys_list) -> any:
             
             if current_mail_date > TWO_YEARS_PERIOD_CHECK:
 
+                # Каждая переменная получит не словарь, а массив. И обратиться к своему словарю.
+                # Нет data_dict получит массив словарей!
                 data_dict : dict = raw_data_convert(msg, raw_data_of_mail, keys_list, date_str)  # Dict of all main data
-                print(data_dict)
+                # print(data_dict)
+                # data_price_report : dict = None
                 if data_dict['Subscription'] != 0:
                     add_to_base(data_dict)                            # Send dict with data to Postgres
                 else:
@@ -115,10 +120,10 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
     
     # SENDER
     sender : str =  (msg['From'])
-    print('sender: ', sender)
+    # print('sender: ', sender)
     index_of_finish = sender.find('<')          # Cut sender's name till '<'
     name = sender[:index_of_finish]             # We don't Cut quotes, some data without quotes
-    print('name: ', name)
+    # print('name: ', name)
 
     # ----- Sender Email -----
     def name_email():                                             # We get email separated from sender
@@ -138,7 +143,7 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
     if hasattr(recipient, '__len__') and len(recipient) < 3:
     # if has_len(recipient) and len(recipient) < 3:
         recipient = 'not@found.net'
-    print('Recipient email: ',recipient)
+    # print('Recipient email: ',recipient)
 
     def recipient_email():                                   # It's start in 'return'
         try:
@@ -150,14 +155,23 @@ def raw_data_convert(msg, raw_data_of_mail, keys_list, date_str) -> dict:
 
     # -= 5 =-
     # Subscription check
-    subscription_check = subscription(
+    subscription_check : int = subscription(
                                         raw_data_of_mail,
                                         keys_list
                                     )
-    
-    # print (msg.get_payload(decode=True))            
+    # print('subscription_check: ', subscription_check)
+    # Если есть подписка переходим к поиску Цен и Отчетов
+    if subscription_check != 0:
+        print('Im on Price Data Chek')
+        # data_price_report = price_reports(raw_data_of_mail)
+    else:
+        pass
+
+    # print (msg.get_payload(decode=True))   
+              
 
     # -= 6 =-
+    # Здесь он вернет массив двух слварей
     return {
         'Sender': name,
         'Email': name_email(),
